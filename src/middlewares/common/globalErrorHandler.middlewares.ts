@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { errorPreprossing } from "@/helper/errorHelper/errorPreprossing";
 import { ErrorRequestHandler } from "express";
 
@@ -14,7 +12,7 @@ export type TErrorResponse = {
   message: string;
   errorDetails: string;
   errorSource: TErrorSource | null;
-  stack?: any;
+  stack?: string | undefined;
 };
 
 export const globalErrorHandler: ErrorRequestHandler = (
@@ -23,32 +21,37 @@ export const globalErrorHandler: ErrorRequestHandler = (
   res,
   next,
 ) => {
+  // Default error response
   let errorResponse: TErrorResponse = {
-    statusCode: err.statusCode || 500,
+    statusCode: (err as any)?.statusCode || 500,
     status: "error",
-    message: err.message || "something went wrong",
-    errorDetails: err.message || "something went wrong",
+    message: (err as any)?.message || "something went wrong",
+    errorDetails: (err as any)?.message || "something went wrong",
     errorSource: [
       {
         path: [],
         message: "something went wrong",
       },
     ],
+    stack: (err as any)?.stack,
   };
 
-  //error preprossing
-  errorResponse = errorPreprossing(err) as TErrorResponse;
+  // Error preprocessing
+  const processedError = errorPreprossing(err);
+  if (processedError) {
+    errorResponse = {
+      ...errorResponse,
+      ...processedError,
+      stack: (err as any)?.stack,
+    };
+  }
 
-  //Ultimately we will send this errorReponse to the client
   return res.status(errorResponse.statusCode).json({
     status: errorResponse.status,
     message: errorResponse.message,
     errorDetails: errorResponse.errorDetails,
     errorSource: errorResponse.errorSource,
-    err,
-    // stack:
-    //   config.node_env === "production" || errorResponse.stack === null
-    //     ? null
-    //     : err?.stack,
+    stack:
+      process.env.NODE_ENV === "production" ? undefined : errorResponse.stack,
   });
 };

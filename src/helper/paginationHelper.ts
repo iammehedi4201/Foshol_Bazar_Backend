@@ -4,7 +4,7 @@ import {
 } from "../app/interfaces/paginationAndSortOptions";
 
 const generatePaginationAndSortOptions = (
-  options: Toptions
+  options: Toptions,
 ): ToptionsResult => {
   //: Convert limit and skip to numbers
   const page = options.page ? Number(options.page) : 1;

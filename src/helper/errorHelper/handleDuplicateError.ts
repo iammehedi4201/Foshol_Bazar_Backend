@@ -1,21 +1,24 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+interface DuplicateError {
+  code?: string;
+  meta?: {
+    target?: string[];
+  };
+}
 
-const handleDuplicateError = (err: PrismaClientKnownRequestError) => {
+const handleDuplicateError = (err: DuplicateError) => {
+  const targets = err.meta?.target ?? [];
+
   return {
     statusCode: 400,
     status: "error",
     message: "Validation Error",
-    errorDetails: (err?.meta?.target as string[])
-      .map((target: any) => {
-        return `${target} is already taken`;
-      })
+    errorDetails: targets
+      .map((target) => `${target} is already taken`)
       .join(" . "),
-    errorSource: (err?.meta?.target as string[]).map((target) => {
-      return {
-        path: [target],
-        message: `${target} is already taken`,
-      };
-    }),
+    errorSource: targets.map((target) => ({
+      path: [target],
+      message: `${target} is already taken`,
+    })),
   };
 };
 

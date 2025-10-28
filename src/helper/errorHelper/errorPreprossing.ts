@@ -1,16 +1,31 @@
+import { ZodError } from "zod";
 import AppError from "./appError";
 import handleDuplicateError from "./handleDuplicateError";
 import handleZodError from "./handleZodErrror";
 import JwtError from "./jwtError";
-import { ZodError } from "zod";
 
-export const errorPreprossing = (err: any) => {
-  //check if the error form zod
+interface ErrorWithCode {
+  code?: string;
+  meta?: {
+    target?: string[];
+  };
+}
+
+export const errorPreprossing = (err: unknown) => {
   if (err instanceof ZodError) {
     return handleZodError(err);
-  } else if (err.code === "P2002") {
-    return handleDuplicateError(err);
-  } else if (err instanceof AppError) {
+  }
+
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as ErrorWithCode).code === "P2002"
+  ) {
+    return handleDuplicateError(err as ErrorWithCode);
+  }
+
+  if (err instanceof AppError) {
     return {
       statusCode: err.statusCode,
       status: "error",
@@ -18,13 +33,17 @@ export const errorPreprossing = (err: any) => {
       errorDetails: err.message,
       errorSource: null,
     };
-  } else if (err instanceof JwtError) {
+  }
+
+  if (err instanceof JwtError) {
     return {
       statusCode: err.statusCode,
       status: "error",
       message: err.message || "Unauthorized Access",
     };
-  } else if (err instanceof Error) {
+  }
+
+  if (err instanceof Error) {
     return {
       statusCode: 500,
       status: "error",

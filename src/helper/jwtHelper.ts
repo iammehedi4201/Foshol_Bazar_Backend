@@ -1,9 +1,9 @@
 import httpStatus from "http-status";
-import jwt, { Secret, SignOptions } from "jsonwebtoken";
+import jwt, { JwtPayload, Secret, SignOptions } from "jsonwebtoken";
 import JwtError from "./errorHelper/jwtError";
 
 export const generateToken = (
-  payLoad: object, // better to use object type
+  payload: object,
   secret: Secret,
   expiresIn: number,
 ): string => {
@@ -12,18 +12,19 @@ export const generateToken = (
     expiresIn,
   };
 
-  // ✅ Explicitly pass SignOptions as the 3rd argument
-  const token = jwt.sign(payLoad, secret, options);
-
+  const token = jwt.sign(payload, secret, options);
   return token;
 };
 
-export const verifyToken = (token: string, secret: Secret): any => {
+// 🎯 Use `JwtPayload | string` instead of `any`
+export const verifyToken = (
+  token: string,
+  secret: Secret,
+): JwtPayload | string => {
   try {
-    // ✅ verify returns the decoded payload
     const decoded = jwt.verify(token, secret);
-    return decoded;
-  } catch (err) {
+    return decoded as JwtPayload | string;
+  } catch (_err) {
     throw new JwtError("Invalid Token", httpStatus.UNAUTHORIZED);
   }
 };

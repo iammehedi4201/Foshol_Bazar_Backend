@@ -1,41 +1,44 @@
 import fs from "fs";
 import path from "path";
 import { v2 as cloudinary } from "cloudinary";
+import type { Express } from "express";
 import multer from "multer";
 
-//! using multer to parse the file and save it to the uploads folder
+// ⚙️ Use environment variables (recommended)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
+
+// 📁 Configure Multer storage
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: function (_req, _file, cb) {
     cb(null, path.join(process.cwd(), "uploads"));
   },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix);
+  filename: function (_req, file, cb) {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${file.fieldname}-${uniqueSuffix}`);
   },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-//! Image  upload to cloudinary
-cloudinary.config({
-  cloud_name: "dpdpsqybu",
-  api_key: "789654295538195",
-  api_secret: "9mFDME3KoMtxs4INmplwp_f2ezQ",
-});
+// ☁️ Upload to Cloudinary
 const uploadToCloudinary = async (
-  file: any,
+  file: Express.Multer.File,
 ): Promise<Record<string, unknown>> => {
-  return new Promise((resolve, rejects) => {
+  return new Promise((resolve, reject) => {
     cloudinary.uploader.upload(
       file.path,
       { public_id: file.originalname },
       function (error, result) {
-        //: delete file from uploads folder
+        // 🧹 Always remove local file
         fs.unlinkSync(file.path);
         if (error) {
-          rejects(error);
+          reject(error);
         } else {
-          resolve(result!);
+          resolve(result as Record<string, unknown>);
         }
       },
     );
