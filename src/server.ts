@@ -5,8 +5,6 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
-import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./config/swaggerConfig";
 
 const app = express();
 
@@ -18,6 +16,5 @@ app.use(cors());
 app.use(helmet());
 app.use(compression());
 app.use(morgan("dev"));
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 export { app };

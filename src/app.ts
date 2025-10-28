@@ -4,18 +4,12 @@ import {
   globalNotFoundHandler,
 } from "@/middlewares/common";
 import type { Request, Response } from "express";
+import { connectDB } from "./config/db";
 import { app } from "./server";
 
-/**
- * @swagger
- * /users:
- *   get:
- *     summary: Get all users
- *     description: Retrieve a list of users
- *     responses:
- *       200:
- *         description: Successfully retrieved list
- */
+// Connect MongoDB before starting the server
+connectDB();
+
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({ data: `Hello, world! - ${PORT}` });
 });
