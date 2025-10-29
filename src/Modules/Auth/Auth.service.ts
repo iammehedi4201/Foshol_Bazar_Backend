@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import AppError from "../../Helpers/AppError";
 import { IJwtPayload } from "../User/User.interface";
 import { User } from "../User/User.model";

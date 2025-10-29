@@ -1,4 +1,3 @@
-// src/modules/User/User.validation.ts
 import { z } from "zod";
 import { userRoles } from "./User.constant";
 
