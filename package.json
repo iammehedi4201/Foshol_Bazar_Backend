@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/package",
   "name": "express-ts-starter",
   "description": "An Express boilerplate backend",
-  "author": "Md Kawsar Islam Yeasin",
+  "author": "Mehedi Hasan",
   "repository": "yeasin2002/express-ts-starter",
   "module": "src/app.ts",
   "type": "commonjs",
@@ -22,8 +22,7 @@
     "cli": "tsx  ./script/index.ts"
   },
   "dependencies": {
-    "@types/swagger-jsdoc": "^6.0.4",
-    "@types/swagger-ui-express": "^4.1.7",
+    "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
     "compression": "^1.7.5",
     "cors": "^2.8.5",
