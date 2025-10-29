@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { errorPreprossing } from "@/helper/errorHelper/errorPreprossing";
 import { ErrorRequestHandler } from "express";
 
