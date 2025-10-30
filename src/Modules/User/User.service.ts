@@ -1,6 +1,9 @@
+import { ENV } from "@/config";
+import { sendVerificationEmail } from "@/helper/emailHelper/sendVerificationEmail";
 import AppError from "@/helper/errorHelper/appError";
-import CreateAccessToken from "../Auth/Auth.utils";
-import { IJwtPayload, IUser } from "./User.interface";
+import { generateToken } from "@/helper/jwtHelper";
+import { email } from "zod";
+import { IUser } from "./User.interface";
 import { User } from "./User.model";
 
 // const RegisterUserToDB = async (payLoad: IUser) => {
@@ -52,17 +55,33 @@ const GetUserById = async (id: string) => {
 
 const UpdateUser = async (id: string, payload: Partial<IUser>) => {
   const user = await User.findById(id);
-  if (!user) {
-    throw new AppError("User not found", 404);
-  }
+  if (!user) throw new AppError("User not found", 404);
+
   const { password, confirmPassword, ...safeData } = payload;
+  let verificationSent = false;
+
+  if (safeData.email && safeData.email !== user.email) {
+    const existingUser = await User.findOne({ email: safeData.email });
+    if (existingUser && existingUser._id.toString() !== id) {
+      throw new AppError("Email already in use", 400);
+    }
+
+    safeData.isVerified = false;
+
+    const token = generateToken({ id, email: safeData.email }, ENV.JWT_SECRET);
+    await sendVerificationEmail(safeData.email, token);
+    verificationSent = true;
+  }
 
   const updatedUser = await User.findByIdAndUpdate(id, safeData, {
     new: true,
     runValidators: true,
   }).select("-password -confirmPassword");
 
-  return updatedUser;
+  return {
+    user: updatedUser,
+    verificationSent,
+  };
 };
 
 const DeleteUser = async (id: string) => {
@@ -87,3 +106,23 @@ export const UserService = {
   UpdateUser,
   DeleteUser,
 };
+
+// import jwt from "jsonwebtoken";
+// import User from "../models/User.model";
+
+// const verifyEmail = async (req, res) => {
+//   const { token } = req.body;
+
+//   try {
+//     const decoded = jwt.verify(token, process.env.EMAIL_SECRET!);
+//     const user = await User.findById(decoded.id);
+//     if (!user) throw new Error("User not found");
+
+//     user.isVerified = true;
+//     await user.save();
+
+//     res.status(200).json({ message: "Email verified successfully" });
+//   } catch (err) {
+//     res.status(400).json({ message: "Invalid or expired token" });
+//   }
+// };

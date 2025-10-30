@@ -3,28 +3,44 @@ import jwt, { JwtPayload, Secret, SignOptions } from "jsonwebtoken";
 import JwtError from "./errorHelper/jwtError";
 
 export const generateToken = (
-  payload: object,
+  payload: Record<string, unknown>,
   secret: Secret,
-  expiresIn: number,
+  expiresIn: string | number = "1h",
 ): string => {
-  const options: SignOptions = {
-    algorithm: "HS256",
-    expiresIn,
-  };
+  try {
+    const options: SignOptions = {
+      algorithm: "HS256",
+      expiresIn: expiresIn as any,
+    };
 
-  const token = jwt.sign(payload, secret, options);
-  return token;
+    return jwt.sign(payload, secret, options);
+  } catch (err) {
+    throw new JwtError(
+      "Failed to generate token",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
 };
 
-// 🎯 Use `JwtPayload | string` instead of `any`
-export const verifyToken = (
-  token: string,
-  secret: Secret,
-): JwtPayload | string => {
+export const verifyToken = (token: string, secret: Secret): JwtPayload => {
   try {
     const decoded = jwt.verify(token, secret);
-    return decoded as JwtPayload | string;
-  } catch (_err) {
-    throw new JwtError("Invalid Token", httpStatus.UNAUTHORIZED);
+
+    if (typeof decoded !== "object" || !("exp" in decoded)) {
+      throw new JwtError("Malformed token", httpStatus.UNAUTHORIZED);
+    }
+
+    return decoded as JwtPayload;
+  } catch (err: any) {
+    if (err.name === "TokenExpiredError") {
+      throw new JwtError("Token expired", httpStatus.UNAUTHORIZED);
+    }
+    if (err.name === "JsonWebTokenError") {
+      throw new JwtError("Invalid token", httpStatus.UNAUTHORIZED);
+    }
+    throw new JwtError(
+      "Token verification failed",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 };

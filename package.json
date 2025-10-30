@@ -34,6 +34,7 @@
     "mongoose": "^8.19.2",
     "morgan": "^1.10.0",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.10",
     "supertest": "^7.0.0",
     "tsconfig-paths": "^4.2.0",
     "zod": "^4.1.12"
@@ -53,6 +54,7 @@
     "@types/morgan": "^1.9.9",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.0.13",
+    "@types/nodemailer": "^7.0.3",
     "@types/supertest": "^6.0.2",
     "cross-env": "^10.0.0",
     "eslint": "^9.19.0",
