@@ -32,4 +32,5 @@ export interface IVendor {
   verification?: IVerification;
   isActive: boolean;
   isVerified: boolean;
+  isProfileComplete: boolean;
 }

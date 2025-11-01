@@ -35,4 +35,5 @@ export interface IDeliveryMan {
   availability?: Availability;
   isActive: boolean;
   isVerified: boolean;
+  isProfileComplete: boolean;
 }

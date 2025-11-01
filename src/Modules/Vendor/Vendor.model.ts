@@ -91,6 +91,10 @@ const vendorSchema = new Schema<IVendor>(
       type: Boolean,
       default: false,
     },
+    isProfileComplete: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

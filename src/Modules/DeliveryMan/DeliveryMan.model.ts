@@ -48,6 +48,7 @@ const DeliveryManSchema = new Schema<IDeliveryMan>(
     },
     isActive: { type: Boolean, default: true },
     isVerified: { type: Boolean, default: false },
+    isProfileComplete: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
