@@ -2,6 +2,7 @@ import { Model } from "mongoose";
 import { userRoles } from "./User.constant";
 
 export interface IUser {
+  _id?: string;
   name: string;
   email: string;
   role: TUserRoles;
@@ -12,6 +13,7 @@ export interface IUser {
 }
 
 export interface IJwtPayload {
+  id: string;
   email: string;
   role: string;
 }

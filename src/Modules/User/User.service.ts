@@ -57,21 +57,24 @@ const UpdateUser = async (id: string, payload: Partial<IUser>) => {
   const user = await User.findById(id);
   if (!user) throw new AppError("User not found", 404);
 
-  const { password, confirmPassword, ...safeData } = payload;
-  let verificationSent = false;
+  const { name, email, password, confirmPassword, ...safeData } = payload;
+  // let verificationSent = false;
 
-  if (safeData.email && safeData.email !== user.email) {
-    const existingUser = await User.findOne({ email: safeData.email });
-    if (existingUser && existingUser._id.toString() !== id) {
-      throw new AppError("Email already in use", 400);
-    }
+  // if (safeData.email && safeData.email !== user.email) {
+  //   const existingUser = await User.findOne({ email: safeData.email });
+  //   if (existingUser && existingUser._id.toString() !== id) {
+  //     throw new AppError("Email already in use", 400);
+  //   }
 
-    safeData.isVerified = false;
+  //   safeData.isVerified = false;
 
-    const token = generateToken({ id, email: safeData.email }, ENV.JWT_SECRET);
-    await sendVerificationEmail(safeData.email, token);
-    verificationSent = true;
-  }
+  //   const token = generateToken(
+  //     { id, email: safeData.email },
+  //     ENV.JWT_ACCESS_SECRET_KEY,
+  //   );
+  //   await sendVerificationEmail(safeData.email, token);
+  //   verificationSent = true;
+  // }
 
   const updatedUser = await User.findByIdAndUpdate(id, safeData, {
     new: true,
@@ -80,7 +83,7 @@ const UpdateUser = async (id: string, payload: Partial<IUser>) => {
 
   return {
     user: updatedUser,
-    verificationSent,
+    // verificationSent,
   };
 };
 

@@ -39,17 +39,17 @@ const getUserById = CatchAsync(async (req, res) => {
 const updateUser = CatchAsync(async (req, res) => {
   const result = await UserService.UpdateUser(req.params.id, req.body);
 
-  let message = "User Updated Successfully";
-  if (result.verificationSent) {
-    message +=
-      ". A verification link has been sent to your new email. Please check your inbox.";
-  }
+  // let message = "User Updated Successfully";
+  // if (result.verificationSent) {
+  //   message +=
+  //     ". A verification link has been sent to your new email. Please check your inbox.";
+  // }
 
   sendResponse(res, {
     success: true,
     statusCode: 200,
     data: result.user,
-    message,
+    message: "User Updated Successfully",
   });
 });
 
