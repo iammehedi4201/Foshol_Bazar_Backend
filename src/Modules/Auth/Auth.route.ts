@@ -1,23 +1,22 @@
+import ValidateRequest from "@/middlewares/common/ValidationRequest";
 import { Router } from "express";
-import ValidateRequest from "../../Middleware/ValidationRequest";
-import { UserController } from "../User/User.controller";
-import { UserValidation } from "../User/User.validation";
 import { AuthController } from "./Auth.controller";
+import { createCustomerValidation } from "./Auth.validation";
 
 const router = Router();
 
-//: Create New User
+//: Create New Customer
 router.post(
-  "/register-user",
-  ValidateRequest(UserValidation.RegisterUserSchema),
-  UserController.RegisterUser,
+  "/register-customer",
+  ValidateRequest(createCustomerValidation),
+  AuthController.registerCustomerToDB,
 );
 
 //: Login User
-router.post(
-  "/login",
-  ValidateRequest(UserValidation.UserLoginSchema),
-  AuthController.LoginUser,
-);
+// router.post(
+//   "/login",
+//   ValidateRequest(UserValidation.UserLoginSchema),
+//   AuthController.LoginUser,
+// );
 
 export const Authroutes = router;

@@ -16,3 +16,11 @@ export interface ICustomer {
   isActive: boolean;
   isVerified: boolean;
 }
+
+export interface CustomerRegisterPayload
+  extends Omit<
+    ICustomer,
+    "user_id" | "isActive" | "isVerified" | "address" | "image"
+  > {
+  password: string;
+}
