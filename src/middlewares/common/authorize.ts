@@ -1,4 +1,4 @@
-import AppError from "@/helper/errorHelper/appError";
+import { AppError } from "@/helper/errorHelper/appError";
 import { verifyToken } from "@/helper/jwtHelper";
 import { IJwtPayload, TUserRoles } from "@/Modules/User/User.interface";
 import { User } from "@/Modules/User/User.model";

@@ -1,28 +1,15 @@
+import { ErrorSource } from "@/interface/interface";
 import { ZodError, ZodIssue } from "zod";
-import {
-  TErrorResponse,
-  TErrorSource,
-} from "../../app/middlewares/globalErrorHandlers";
+import { ValidationError } from "./ValidationError";
 
-const handleZodError = (err: ZodError): TErrorResponse => {
-  //error source
-  const errorSource: TErrorSource = err.issues.map((issue: ZodIssue) => {
-    return {
-      path: issue.path as string[],
-      message: issue?.message,
-    };
-  });
-  //error details
-  const errorDetails = errorSource
-    .map((error) => `${error.path[error.path.length - 1]} is ${error.message}`)
-    .join(" . ");
-  return {
-    statusCode: 400,
-    status: "error",
-    message: "validation Error",
-    errorDetails: errorDetails,
-    errorSource,
-  };
+export const handleZodError = (error: ZodError): ValidationError => {
+  const errorSources: ErrorSource[] = error.issues.map((issue: ZodIssue) => ({
+    path:
+      issue.path.length > 0
+        ? issue.path.map(String) // ✅ convert numbers/symbols to string
+        : ["_global"],
+    message: issue.message,
+  }));
+
+  return new ValidationError("Validation failed", errorSources);
 };
-
-export default handleZodError;

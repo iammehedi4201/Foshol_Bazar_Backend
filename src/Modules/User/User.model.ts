@@ -28,11 +28,6 @@ const UserSchema = new Schema<IUser, UserModel>(
       required: [true, "Please enter your password"],
       trim: true,
     },
-    confirmPassword: {
-      type: String,
-      required: [true, "Please enter your password again"],
-      trim: true,
-    },
     isVerified: {
       type: Boolean,
       default: false,
