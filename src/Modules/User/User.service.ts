@@ -1,6 +1,6 @@
 import { ENV } from "@/config";
 import { sendVerificationEmail } from "@/helper/emailHelper/sendVerificationEmail";
-import AppError from "@/helper/errorHelper/appError";
+import { AppError } from "@/helper/errorHelper/appError";
 import { generateToken } from "@/helper/jwtHelper";
 import { email } from "zod";
 import { IUser } from "./User.interface";

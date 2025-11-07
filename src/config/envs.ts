@@ -29,6 +29,10 @@ const envSchema = z.object({
   ACCESS_KEY_ID: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   RESEND_SENDER: z.string().optional(),
+
+  CLOUDINARY_CLOUD_NAME: z.string().min(1, "CLOUDINARY_CLOUD_NAME is required"),
+  CLOUDINARY_API_KEY: z.string().min(1, "CLOUDINARY_API_KEY is required"),
+  CLOUDINARY_API_SECRET: z.string().min(1, "CLOUDINARY_API_SECRET is required"),
 });
 
 const env = envSchema.safeParse(process.env);
@@ -59,4 +63,8 @@ export const ENV = {
   SUPER_ADMIN_PASSWORD: env.data.SUPER_ADMIN_PASSWORD,
   RESET_PASS_UI_URL: env.data.RESET_PASS_UI_URL,
   SALT_ROUNDS: Number(env.data.SALT_ROUNDS),
+
+  CLOUDINARY_CLOUD_NAME: env.data.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: env.data.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: env.data.CLOUDINARY_API_SECRET,
 };
