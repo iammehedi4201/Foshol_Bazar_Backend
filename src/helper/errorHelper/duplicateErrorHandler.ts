@@ -1,5 +1,5 @@
+import { ConflictError } from "@/helper/errorHelper/ConflictError";
 import { ErrorSource } from "@/interface/interface";
-import { ConflictError } from "@/middlewares/common/ConflictError";
 
 interface DuplicateErrorData {
   code?: number | string;

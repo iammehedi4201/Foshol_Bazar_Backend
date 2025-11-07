@@ -2,7 +2,7 @@ import { processError } from "@/helper/errorHelper/errorPreprocessing";
 import { ValidationError } from "@/helper/errorHelper/ValidationError";
 import { ErrorResponse } from "@/interface/interface";
 import { ErrorRequestHandler } from "express";
-import { ConflictError } from "./ConflictError";
+import { ConflictError } from "../../helper/errorHelper/ConflictError";
 
 export const globalErrorHandler: ErrorRequestHandler = (
   error,

@@ -1,4 +1,4 @@
-import { authorize } from "@/middlewares/common/authorize";
+import { authorize } from "@/helper/errorHelper/authorize";
 import { Router } from "express";
 import { UserController } from "./User.controller";
 

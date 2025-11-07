@@ -1,4 +1,4 @@
-import { AuthenticationError } from "@/middlewares/common/AuthenticationError";
+import { AuthenticationError } from "@/helper/errorHelper/AuthenticationError";
 import {
   JsonWebTokenError,
   NotBeforeError,
