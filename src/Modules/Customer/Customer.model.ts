@@ -37,7 +37,6 @@ const customerSchema = new Schema<ICustomer>(
     },
     address: {
       type: addressSchema,
-      required: [true, "address is required"],
     },
     image: {
       type: String,
@@ -46,10 +45,6 @@ const customerSchema = new Schema<ICustomer>(
     isActive: {
       type: Boolean,
       default: true,
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
     },
   },
   { timestamps: true },

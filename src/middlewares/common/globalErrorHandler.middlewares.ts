@@ -33,11 +33,11 @@ export const globalErrorHandler: ErrorRequestHandler = (
     errorResponse.errorDetails = processedError.errorSources
       .map((source) => {
         const fieldName = Array.isArray(source.path)
-          ? source.path.join(".")
+          ? source.path[source.path.length - 1] // Take only the last part of the path
           : source.path;
         return `${fieldName}: ${source.message}`;
       })
-      .join("; ");
+      .join(". "); // Use period and space instead of semicolon
   }
 
   // Add stack trace in development

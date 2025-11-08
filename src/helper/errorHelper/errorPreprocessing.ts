@@ -3,7 +3,7 @@ import { JsonWebTokenError } from "jsonwebtoken";
 import { Error as MongooseError } from "mongoose";
 import { ZodError } from "zod";
 import { AppError } from "./appError";
-import { handleDuplicateError } from "./duplicateErrorHandler";
+import { handleDuplicateError } from "./handleDuplicateError";
 import { handleZodError } from "./handleZodErrror";
 import { handleJWTError } from "./jwtErrorHandler";
 import {
@@ -29,7 +29,7 @@ export const processError = (error: unknown): AppError => {
 
   // Handle duplicate/unique constraint errors
   if (isDuplicateError(error)) {
-    return handleDuplicateError(error as any);
+    return handleDuplicateError(error);
   }
 
   // Handle JWT errors
@@ -51,15 +51,15 @@ export const processError = (error: unknown): AppError => {
   return new AppError("An unexpected error occurred", 500);
 };
 
-// Type guards
-const isDuplicateError = (error: unknown): boolean => {
+type DuplicateError = { code: number | string };
+
+const isDuplicateError = (error: unknown): error is DuplicateError => {
   return (
     typeof error === "object" &&
     error !== null &&
     "code" in error &&
-    // Mongoose duplicate key error (code 11000) or Prisma (P2002)
-    ((error as { code?: number | string }).code === 11000 ||
-      (error as { code?: string }).code === "P2002")
+    ((error as DuplicateError).code === 11000 ||
+      (error as DuplicateError).code === "P2002")
   );
 };
 

@@ -12,6 +12,14 @@ router.post(
   AuthController.registerCustomerToDB,
 );
 
+//: verify Email
+router.get("/verify-email", AuthController.verifyEmail);
+
+// send otp fallback route
+router.post("/send-otp", AuthController.sendOTP);
+
+router.get("/verify-otp", AuthController.verifyOTP);
+
 //: Login User
 // router.post(
 //   "/login",

@@ -59,3 +59,127 @@ export const getVerificationEmailTemplate = (verificationUrl: string) => `
     </table>
   </body>
 </html>`;
+
+export const getOTPEmailTemplate = (
+  otp: string,
+  expiryMinutes: number = 10,
+) => `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Verification Code</title>
+  </head>
+  <body
+    style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f4f7fa;"
+  >
+    <table
+      role="presentation"
+      style="width:100%;border-collapse:collapse;background-color:#f4f7fa;"
+    >
+      <tr>
+        <td align="center" style="padding:40px 20px;">
+          <table
+            role="presentation"
+            style="width:100%;max-width:600px;border-collapse:collapse;background-color:#ffffff;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.1);"
+          >
+            <!-- Header Section -->
+            <tr>
+              <td
+                style="padding:40px 40px 30px;text-align:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px 12px 0 0;"
+              >
+                <div
+                  style="width:80px;height:80px;background-color:rgba(255,255,255,0.2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);margin:0 auto;"
+                >
+                  <svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 17C11.45 17 11 16.55 11 16V12C11 11.45 11.45 11 12 11C12.55 11 13 11.45 13 12V16C13 16.55 12.55 17 12 17ZM13 9H11V7H13V9Z"
+                      fill="white"
+                    />
+                  </svg>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Main Content -->
+            <tr>
+              <td style="padding:40px;">
+                <h1
+                  style="margin:0 0 16px;font-size:28px;font-weight:700;color:#1a1a1a;text-align:center;"
+                >
+                  Verification Code
+                </h1>
+                <p
+                  style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#4a5568;text-align:center;"
+                >
+                  Use the following code to complete your verification:
+                </p>
+
+                <!-- OTP Box -->
+                <table role="presentation" style="width:100%;margin:0px 0;">
+                  <tr>
+                    <td align="center">
+                      <div
+                        style="display:inline-block;background:linear-gradient(135deg,#f7fafc 0%,#edf2f7 100%);border:2px dashed #cbd5e0;border-radius:12px;padding:24px 48px;"
+                      >
+                        <div
+                          style="font-size:42px;font-weight:800;letter-spacing:8px;color:#667eea;font-family:'Courier New',monospace;text-align:center;"
+                        >
+                          ${otp}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Warning Section -->
+            <tr>
+              <td style="padding:0 40px 40px;">
+                <div
+                  style="background-color:#fff5f5;border-left:4px solid #f56565;padding:16px;border-radius:6px;"
+                >
+                  <p
+                    style="margin:0;font-size:14px;color:#742a2a;line-height:1.5;"
+                  >
+                    <strong>⏰ Important:</strong> This code will expire in
+                    <strong>${expiryMinutes} minutes</strong> for security
+                    reasons.
+                  </p>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="padding:32px 40px;background-color:#f8fafc;border-radius:0 0 12px 12px;border-top:1px solid #e2e8f0;"
+              >
+                <p
+                  style="margin:0 0 8px;font-size:13px;color:#64748b;text-align:center;"
+                >
+                  Need help? Contact our support team
+                </p>
+                <p
+                  style="margin:0;font-size:13px;color:#a0aec0;text-align:center;"
+                >
+                  © ${new Date().getFullYear()} Your Company. All rights
+                  reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`;

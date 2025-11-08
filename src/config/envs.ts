@@ -10,6 +10,8 @@ const envSchema = z.object({
   PORT: z.string().default("3000"),
   MONGO_URI: z.string().min(1, "MONGO_URI is required"),
 
+  CLIENT_URL: z.string().url("CLIENT_URL must be a valid URL"),
+
   JWT_ACCESS_SECRET_KEY: z.string().min(1, "JWT_ACCESS_SECRET_KEY is required"),
   JWT_REFRESH_SECRET_KEY: z
     .string()
@@ -18,6 +20,9 @@ const envSchema = z.object({
   REFRESH_TOKEN_EXPIERY: z.string().default("365d"),
 
   EMAIL: z.string().email(),
+  EMAIL_VERIFICATION_SECRET: z
+    .string()
+    .min(1, "EMAIL_VERIFICATION_SECRET is required"),
   APP_PASSWORD: z.string(),
   EMAIL_SERVICE: z.string().default("smtp.gmail.com"),
 
@@ -50,12 +55,15 @@ export const ENV = {
   PORT: Number(env.data.PORT),
   MONGO_URI: env.data.MONGO_URI,
 
+  CLIENT_URL: env.data.CLIENT_URL,
+
   JWT_ACCESS_SECRET_KEY: env.data.JWT_ACCESS_SECRET_KEY,
   JWT_REFRESH_SECRET_KEY: env.data.JWT_REFRESH_SECRET_KEY,
   ACCESS_TOKEN_EXPIERY: env.data.ACCESS_TOKEN_EXPIERY,
   REFRESH_TOKEN_EXPIERY: env.data.REFRESH_TOKEN_EXPIERY,
 
   EMAIL: env.data.EMAIL,
+  EMAIL_VERIFICATION_SECRET: env.data.EMAIL_VERIFICATION_SECRET,
   APP_PASSWORD: env.data.APP_PASSWORD,
   EMAIL_SERVICE: env.data.EMAIL_SERVICE,
 
