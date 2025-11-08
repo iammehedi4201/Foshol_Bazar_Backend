@@ -26,9 +26,6 @@ export const createCustomerValidation = z.object({
     .object({
       name: z.string().min(2, "Name must be at least 2 characters"),
       email: z.string().email("Invalid email address"),
-      phone: z
-        .string()
-        .regex(/^[0-9]{10,15}$/, "Phone number must be 10–15 digits"),
       password: passwordSchema,
       confirmPassword: passwordSchema,
     })
@@ -36,4 +33,20 @@ export const createCustomerValidation = z.object({
       message: "Passwords do not match",
       path: ["confirmPassword"],
     }),
+});
+
+// OTP Verification Schema
+export const verifyOTPSchema = z.object({
+  body: z.object({
+    email: z.string().email("Invalid email address"),
+    code: z.string().length(6, "OTP code must be 6 characters"),
+  }),
+});
+
+// Login Schema
+export const loginSchema = z.object({
+  body: z.object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(1, "Password is required"),
+  }),
 });

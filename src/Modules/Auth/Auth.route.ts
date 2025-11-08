@@ -1,7 +1,11 @@
 import ValidateRequest from "@/middlewares/common/ValidationRequest";
 import { Router } from "express";
 import { AuthController } from "./Auth.controller";
-import { createCustomerValidation } from "./Auth.validation";
+import {
+  createCustomerValidation,
+  loginSchema,
+  verifyOTPSchema,
+} from "./Auth.validation";
 
 const router = Router();
 
@@ -12,13 +16,20 @@ router.post(
   AuthController.registerCustomerToDB,
 );
 
-//: verify Email
-router.get("/verify-email", AuthController.verifyEmail);
+router.post("/login", ValidateRequest(loginSchema), AuthController.loginToDB);
 
 // send otp fallback route
 router.post("/send-otp", AuthController.sendOTP);
 
-router.get("/verify-otp", AuthController.verifyOTP);
+// verify email route
+router.get("/verify-email", AuthController.verifyEmail);
+
+// verify otp route
+router.get(
+  "/verify-otp",
+  ValidateRequest(verifyOTPSchema),
+  AuthController.sendOTP,
+);
 
 //: Login User
 // router.post(

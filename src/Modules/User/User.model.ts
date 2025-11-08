@@ -1,3 +1,4 @@
+import { comparePassword } from "@/helper/password.helper";
 import { model, Schema } from "mongoose";
 import { userRoles, UserRoles } from "./User.constant";
 import { IUser, UserModel } from "./User.interface";
@@ -51,12 +52,12 @@ const UserSchema = new Schema<IUser, UserModel>(
 //   next();
 // });
 
-//check if password is correct
-// UserSchema.static(
-//   "isPasswordCorrect",
-//   async function (password: string, hashedPassword: string) {
-//     return await bcrypt.compare(password, hashedPassword);
-//   },
-// );
+// check if password is correct
+UserSchema.static(
+  "isPasswordCorrect",
+  async function (password: string, hashedPassword: string) {
+    return await comparePassword(password, hashedPassword);
+  },
+);
 
 export const User = model<IUser, UserModel>("User", UserSchema);

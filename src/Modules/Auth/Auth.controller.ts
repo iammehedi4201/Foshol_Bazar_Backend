@@ -13,6 +13,7 @@ import { AuthService } from "./Auth.service";
 //   });
 // });
 
+//! Register Customer Controller
 const registerCustomerToDB = CatchAsync(async (req, res) => {
   const result = await AuthService.registerCustomerToDB(req.body);
 
@@ -22,6 +23,29 @@ const registerCustomerToDB = CatchAsync(async (req, res) => {
     statusCode: 201,
     message: "Customer registered successfully",
     data: result,
+  });
+});
+
+//! Login User Controller
+
+const loginToDB = CatchAsync(async (req, res) => {
+  const { accessToken, refreshToken, user } = await AuthService.loginToDB(
+    req.body,
+  );
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: ENV.NODE_ENV === "production",
+    sameSite: ENV.NODE_ENV === "production" ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: "/",
+  });
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Logged in successfully",
+    data: { accessToken, user },
   });
 });
 
@@ -105,7 +129,7 @@ export const verifyOTPCode = CatchAsync(async (req, res) => {
   });
 });
 export const AuthController = {
-  // LoginUser,
+  loginToDB,
   registerCustomerToDB,
   verifyEmail,
   sendOTP,

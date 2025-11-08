@@ -8,12 +8,12 @@ import { CustomerRegisterPayload } from "../Customer/Customer.interface";
 import { Customer } from "../Customer/Customer.model";
 import { EmailVerification } from "../EmailVerification/EmailVerification.model";
 import { userRoles } from "../User/User.constant";
-import { IUser } from "../User/User.interface";
 import { User } from "../User/User.model";
 import { hashPassword } from "./../../helper/password.helper";
 
+//! Register Customer Service
 const registerCustomerToDB = async (payLoad: CustomerRegisterPayload) => {
-  const { name, email, phone, password } = payLoad;
+  const { name, email, password } = payLoad;
 
   const hashedPassword = await hashPassword(password);
 
@@ -43,7 +43,6 @@ const registerCustomerToDB = async (payLoad: CustomerRegisterPayload) => {
         {
           name,
           email,
-          phone,
           user_id: user._id,
         },
       ],
@@ -70,6 +69,35 @@ const registerCustomerToDB = async (payLoad: CustomerRegisterPayload) => {
   verificationSent = true;
 
   return customer;
+};
+
+//! Login Service
+const loginToDB = async (payLoad: { email: string; password: string }) => {
+  const { email, password } = payLoad;
+
+  const user = await User.findOne({ email, isActive: true });
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  const isPasswordValid = await User.isPasswordCorrect(password, user.password);
+
+  if (!isPasswordValid) {
+    throw new AppError("Invalid credentials", 401);
+  }
+
+  // Generate tokens AFTER transaction (doesn't need DB lock)
+  const payload = { id: user._id, email: user.email, role: user.role };
+
+  const accessToken = generateToken(payload, ENV.JWT_ACCESS_SECRET_KEY, "15m");
+  const refreshToken = generateToken(payload, ENV.JWT_REFRESH_SECRET_KEY, "7d");
+
+  return {
+    user,
+    accessToken,
+    refreshToken,
+  };
 };
 
 const verifyEmail = async (token: string) => {
@@ -194,6 +222,7 @@ const verifyOTPCode = async (email: string, code: string) => {
 
 export const AuthService = {
   registerCustomerToDB,
+  loginToDB,
   verifyEmail,
   sendOTP,
   verifyOTPCode,
