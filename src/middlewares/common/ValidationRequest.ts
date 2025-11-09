@@ -6,6 +6,9 @@ const ValidateRequest = (Schema: ZodObject<any>) => {
   return CatchAsync(async (req, res, next) => {
     await Schema.parseAsync({
       body: req.body,
+      cookies: req.cookies,
+      query: req.query,
+      params: req.params,
     });
     next();
   });

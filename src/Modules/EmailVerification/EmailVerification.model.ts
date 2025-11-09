@@ -37,6 +37,11 @@ const emailVerificationSchema = new Schema<EmailVerificationModel>(
       type: Boolean,
       default: false,
     },
+    attempts: {
+      type: Number,
+      default: 0,
+      max: 3,
+    },
   },
   {
     timestamps: true,

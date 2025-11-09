@@ -4,38 +4,40 @@ import { AuthController } from "./Auth.controller";
 import {
   createCustomerValidation,
   loginSchema,
+  refreshTokenSchema,
   verifyOTPSchema,
 } from "./Auth.validation";
 
 const router = Router();
 
-//: Create New Customer
+//! Create New Customer
 router.post(
   "/register-customer",
   ValidateRequest(createCustomerValidation),
   AuthController.registerCustomerToDB,
 );
 
+//! Login User
 router.post("/login", ValidateRequest(loginSchema), AuthController.loginToDB);
 
-// send otp fallback route
+//! Send OTP Fallback Route
 router.post("/send-otp", AuthController.sendOTP);
 
-// verify email route
+//! Verify Email Route
 router.get("/verify-email", AuthController.verifyEmail);
 
-// verify otp route
-router.get(
+//! Verify OTP Route
+router.post(
   "/verify-otp",
   ValidateRequest(verifyOTPSchema),
-  AuthController.sendOTP,
+  AuthController.verifyOTPCode,
 );
 
-//: Login User
-// router.post(
-//   "/login",
-//   ValidateRequest(UserValidation.UserLoginSchema),
-//   AuthController.LoginUser,
-// );
+//! Refresh Access Token Route
+router.post(
+  "/refresh-token",
+  ValidateRequest(refreshTokenSchema),
+  AuthController.refreshAccessToken,
+);
 
 export const Authroutes = router;

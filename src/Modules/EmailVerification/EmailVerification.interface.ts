@@ -7,8 +7,7 @@ export interface IEmailVerification {
   type: "otp";
   expiresAt: Date;
   used: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  attempts: number;
 }
 
 export interface IEmailVerificationMethods {

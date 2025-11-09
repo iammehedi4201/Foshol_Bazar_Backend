@@ -50,3 +50,10 @@ export const loginSchema = z.object({
     password: z.string().min(1, "Password is required"),
   }),
 });
+
+// Refresh Token Schema
+export const refreshTokenSchema = z.object({
+  cookies: z.object({
+    refreshToken: z.string().min(1, "Refresh token is required"),
+  }),
+});

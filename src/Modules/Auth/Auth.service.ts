@@ -100,6 +100,7 @@ const loginToDB = async (payLoad: { email: string; password: string }) => {
   };
 };
 
+//! Verify Email Service
 const verifyEmail = async (token: string) => {
   if (!token) {
     throw new AppError("token is required", 400);
@@ -150,9 +151,20 @@ const verifyEmail = async (token: string) => {
   };
 };
 
+//! Send OTP Service
 const sendOTP = async (email: string) => {
   const user = await User.findOne({ email, isVerified: false });
   if (!user) throw new AppError("User not found or already verified", 404);
+
+  // ✅ Add this check:
+  const recentOTP = await EmailVerification.findOne({
+    email,
+    createdAt: { $gt: new Date(Date.now() - 60 * 1000) }, // 1 min cooldown
+  });
+
+  if (recentOTP) {
+    throw new AppError("Please wait 1 minute before requesting a new OTP", 429);
+  }
 
   // Revoke old OTPs
   await EmailVerification.deleteMany({ userId: user._id, used: false });
@@ -171,6 +183,7 @@ const sendOTP = async (email: string) => {
   return { message: "OTP sent to email" };
 };
 
+//! Verify OTP Service
 const verifyOTPCode = async (email: string, code: string) => {
   const record = await EmailVerification.findOne({
     email,
@@ -178,13 +191,22 @@ const verifyOTPCode = async (email: string, code: string) => {
     expiresAt: { $gt: new Date() }, // ← CRITICAL: Check expiry
   });
 
-  if (!record) {
-    throw new AppError("No OTP request found for this email", 404);
+  if (!record) throw new AppError("Invalid or expired code", 400);
+
+  // ✅ Check attempts
+  if (record.attempts >= 3) {
+    throw new AppError("Too many failed attempts. Request a new OTP.", 429);
   }
 
-  if (!record) throw new AppError("Invalid or expired code", 400);
-  if (!(await record.isValidCode(code)))
+  if (!(await record.isValidCode(code))) {
+    // ✅ Increment attempts
+    await EmailVerification.updateOne(
+      { _id: record._id },
+
+      { $inc: { attempts: 1 } },
+    );
     throw new AppError("Incorrect code", 400);
+  }
 
   await EmailVerification.updateOne({ _id: record._id }, { used: true });
 
@@ -220,10 +242,48 @@ const verifyOTPCode = async (email: string, code: string) => {
   return { accessToken, refreshToken };
 };
 
+//! Refresh Token Service
+const refreshAccessToken = async (refreshToken: string) => {
+  if (!refreshToken) {
+    throw new AppError("Refresh token is required", 401);
+  }
+
+  // Verify refresh token
+  const decoded = verifyToken(refreshToken, ENV.JWT_REFRESH_SECRET_KEY);
+
+  // Find user and verify they still exist and are active
+  const user = await User.findOne({
+    _id: decoded.id,
+    email: decoded.email,
+    isActive: true,
+    isVerified: true,
+  });
+
+  if (!user) {
+    throw new AppError("User not found or inactive", 404);
+  }
+
+  // Generate new access token
+  const accessToken = generateToken(
+    {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+    },
+    ENV.JWT_ACCESS_SECRET_KEY,
+    "15m",
+  );
+
+  return {
+    accessToken,
+  };
+};
+
 export const AuthService = {
   registerCustomerToDB,
   loginToDB,
   verifyEmail,
   sendOTP,
   verifyOTPCode,
+  refreshAccessToken,
 };

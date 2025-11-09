@@ -27,7 +27,6 @@ const registerCustomerToDB = CatchAsync(async (req, res) => {
 });
 
 //! Login User Controller
-
 const loginToDB = CatchAsync(async (req, res) => {
   const { accessToken, refreshToken, user } = await AuthService.loginToDB(
     req.body,
@@ -49,6 +48,7 @@ const loginToDB = CatchAsync(async (req, res) => {
   });
 });
 
+//! Verify Email Controller
 const verifyEmail = CatchAsync(async (req, res) => {
   const { token } = req.query;
 
@@ -72,11 +72,8 @@ const verifyEmail = CatchAsync(async (req, res) => {
     path: "/",
   });
 
-  // 2. Decide redirect URL
-  const clientBase = ENV.CLIENT_URL;
-  let redirectTo: string;
   // 2. Redirect to /home with accessToken
-  const redirectUrl = new URL("/home", process.env.CLIENT_URL!);
+  const redirectUrl = new URL("/", ENV.CLIENT_URL);
   redirectUrl.searchParams.set("accessToken", accessToken);
 
   // Optional: Add flag so frontend knows it's post-verification
@@ -90,6 +87,7 @@ const verifyEmail = CatchAsync(async (req, res) => {
   });
 });
 
+//! Send OTP Controller
 const sendOTP = CatchAsync(async (req, res) => {
   const { email } = req.body;
   const result = await AuthService.sendOTP(email);
@@ -102,7 +100,8 @@ const sendOTP = CatchAsync(async (req, res) => {
   });
 });
 
-export const verifyOTPCode = CatchAsync(async (req, res) => {
+//! Verify OTP Controller
+const verifyOTPCode = CatchAsync(async (req, res) => {
   const { email, code } = req.body;
   const { accessToken, refreshToken } = await AuthService.verifyOTPCode(
     email,
@@ -128,9 +127,26 @@ export const verifyOTPCode = CatchAsync(async (req, res) => {
     data: { redirectTo: redirectUrl.toString() },
   });
 });
+
+//! Refresh Token Controller
+const refreshAccessToken = CatchAsync(async (req, res) => {
+  const { refreshToken } = req.cookies;
+
+  const { accessToken } = await AuthService.refreshAccessToken(refreshToken);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Access token refreshed successfully",
+    data: { accessToken },
+  });
+});
+
 export const AuthController = {
   loginToDB,
   registerCustomerToDB,
   verifyEmail,
   sendOTP,
+  verifyOTPCode,
+  refreshAccessToken,
 };
