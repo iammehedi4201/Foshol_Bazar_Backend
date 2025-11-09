@@ -1,5 +1,6 @@
 import { ENV } from "@/config";
 import { sendOTPEmail } from "@/helper/emailHelper/sendOTPEmail";
+import { sendPasswordResetEmail } from "@/helper/emailHelper/sendPasswordResetEmail";
 import { sendVerificationEmail } from "@/helper/emailHelper/sendVerificationEmail";
 import { AppError } from "@/helper/errorHelper/appError";
 import { generateToken, verifyToken } from "@/helper/jwtHelper";
@@ -279,6 +280,76 @@ const refreshAccessToken = async (refreshToken: string) => {
   };
 };
 
+//! Forgot Password Service
+const forgotPassword = async (email: string) => {
+  // Find user by email
+  const user = await User.findOne({ email, isActive: true });
+
+  // Always return success to prevent email enumeration
+  if (!user) {
+    return {
+      message:
+        "If an account exists with this email, a password reset link has been sent.",
+    };
+  }
+
+  // Generate password reset token
+  const resetToken = generateToken(
+    {
+      id: user._id,
+      email: user.email,
+      purpose: "password-reset",
+    },
+    ENV.PASSWORD_RESET_SECRET,
+    "15min",
+  );
+
+  // Send password reset email
+  await sendPasswordResetEmail(email, resetToken);
+
+  return {
+    message:
+      "If an account exists with this email, a password reset link has been sent.",
+  };
+};
+
+//! Reset Password Service
+const resetPassword = async (token: string, newPassword: string) => {
+  // Verify reset token
+  const decoded = verifyToken(token, ENV.PASSWORD_RESET_SECRET);
+
+  // Validate token purpose
+  if (decoded.purpose !== "password-reset") {
+    throw new AppError("Invalid token", 401);
+  }
+
+  // Find user
+  const user = await User.findOne({
+    _id: decoded.id,
+    email: decoded.email,
+    isActive: true,
+  });
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  // Hash new password
+  const hashedPassword = await hashPassword(newPassword);
+
+  // Update password
+  user.password = hashedPassword;
+  await user.save();
+
+  // Invalidate all existing sessions (optional but recommended)
+  // You might want to implement a token blacklist or version system
+
+  return {
+    message:
+      "Password reset successfully. Please login with your new password.",
+  };
+};
+
 export const AuthService = {
   registerCustomerToDB,
   loginToDB,
@@ -286,4 +357,6 @@ export const AuthService = {
   sendOTP,
   verifyOTPCode,
   refreshAccessToken,
+  forgotPassword,
+  resetPassword,
 };

@@ -3,8 +3,10 @@ import { Router } from "express";
 import { AuthController } from "./Auth.controller";
 import {
   createCustomerValidation,
+  forgotPasswordSchema,
   loginSchema,
   refreshTokenSchema,
+  resetPasswordSchema,
   verifyOTPSchema,
 } from "./Auth.validation";
 
@@ -38,6 +40,20 @@ router.post(
   "/refresh-token",
   ValidateRequest(refreshTokenSchema),
   AuthController.refreshAccessToken,
+);
+
+//! Forgot Password Route
+router.post(
+  "/forgot-password",
+  ValidateRequest(forgotPasswordSchema),
+  AuthController.forgotPassword,
+);
+
+//! Reset Password Route
+router.post(
+  "/reset-password",
+  ValidateRequest(resetPasswordSchema),
+  AuthController.resetPassword,
 );
 
 export const Authroutes = router;

@@ -57,3 +57,24 @@ export const refreshTokenSchema = z.object({
     refreshToken: z.string().min(1, "Refresh token is required"),
   }),
 });
+
+// Forgot Password Schema
+export const forgotPasswordSchema = z.object({
+  body: z.object({
+    email: z.string().email("Invalid email address"),
+  }),
+});
+
+// Reset Password Schema
+export const resetPasswordSchema = z.object({
+  body: z
+    .object({
+      token: z.string().min(1, "Reset token is required"),
+      password: passwordSchema,
+      confirmPassword: passwordSchema,
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords do not match",
+      path: ["confirmPassword"],
+    }),
+});

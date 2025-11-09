@@ -16,6 +16,7 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET_KEY: z
     .string()
     .min(1, "JWT_REFRESH_SECRET_KEY is required"),
+  PASSWORD_RESET_SECRET: z.string().min(1, "PASSWORD_RESET_SECRET is required"),
   ACCESS_TOKEN_EXPIERY: z.string().default("10d"),
   REFRESH_TOKEN_EXPIERY: z.string().default("365d"),
 
@@ -70,6 +71,7 @@ export const ENV = {
   SUPER_ADMIN_EMAIL: env.data.SUPER_ADMIN_EMAIL,
   SUPER_ADMIN_PASSWORD: env.data.SUPER_ADMIN_PASSWORD,
   RESET_PASS_UI_URL: env.data.RESET_PASS_UI_URL,
+  PASSWORD_RESET_SECRET: env.data.PASSWORD_RESET_SECRET,
   SALT_ROUNDS: Number(env.data.SALT_ROUNDS),
 
   CLOUDINARY_CLOUD_NAME: env.data.CLOUDINARY_CLOUD_NAME,

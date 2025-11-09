@@ -142,6 +142,32 @@ const refreshAccessToken = CatchAsync(async (req, res) => {
   });
 });
 
+//! Forgot Password Controller
+const forgotPassword = CatchAsync(async (req, res) => {
+  const { email } = req.body;
+  const result = await AuthService.forgotPassword(email);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: result.message,
+    data: null,
+  });
+});
+
+//! Reset Password Controller
+const resetPassword = CatchAsync(async (req, res) => {
+  const { token, password } = req.body;
+  const result = await AuthService.resetPassword(token, password);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: result.message,
+    data: null,
+  });
+});
+
 export const AuthController = {
   loginToDB,
   registerCustomerToDB,
@@ -149,4 +175,6 @@ export const AuthController = {
   sendOTP,
   verifyOTPCode,
   refreshAccessToken,
+  forgotPassword,
+  resetPassword,
 };
