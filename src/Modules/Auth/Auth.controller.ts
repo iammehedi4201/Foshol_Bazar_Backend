@@ -168,6 +168,30 @@ const resetPassword = CatchAsync(async (req, res) => {
   });
 });
 
+//! Register Vendor Controller
+const registerVendorToDB = CatchAsync(async (req, res) => {
+  const result = await AuthService.createVendorToDB(req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 201,
+    message: "Vendor registered successfully",
+    data: result,
+  });
+});
+
+//! Register DeliveryMan Controller
+const registerDeliveryManToDB = CatchAsync(async (req, res) => {
+  const result = await AuthService.createDeliveryManToDB(req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 201,
+    message: "Delivery man registered successfully",
+    data: result,
+  });
+});
+
 export const AuthController = {
   loginToDB,
   registerCustomerToDB,
@@ -177,4 +201,6 @@ export const AuthController = {
   refreshAccessToken,
   forgotPassword,
   resetPassword,
+  registerVendorToDB,
+  registerDeliveryManToDB,
 };

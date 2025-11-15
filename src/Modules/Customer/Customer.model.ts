@@ -46,6 +46,7 @@ const customerSchema = new Schema<ICustomer>(
       type: Boolean,
       default: true,
     },
+    isProfileComplete: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

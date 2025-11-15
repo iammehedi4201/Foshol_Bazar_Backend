@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import { ENV } from "@/config";
 import { sendOTPEmail } from "@/helper/emailHelper/sendOTPEmail";
 import { sendPasswordResetEmail } from "@/helper/emailHelper/sendPasswordResetEmail";
@@ -7,9 +8,12 @@ import { generateToken, verifyToken } from "@/helper/jwtHelper";
 import { performDBTransaction } from "@/Utils/performDBTransaction";
 import { CustomerRegisterPayload } from "../Customer/Customer.interface";
 import { Customer } from "../Customer/Customer.model";
+import { DeliveryMan } from "../DeliveryMan/DeliveryMan.model"; // add near other imports
 import { EmailVerification } from "../EmailVerification/EmailVerification.model";
 import { userRoles } from "../User/User.constant";
 import { User } from "../User/User.model";
+import { Vendor } from "../Vendor/Vendor.model"; // add import near other imports
+
 import { hashPassword } from "./../../helper/password.helper";
 
 //! Register Customer Service
@@ -53,7 +57,100 @@ const registerCustomerToDB = async (payLoad: CustomerRegisterPayload) => {
     return { user, customer };
   });
 
-  let verificationSent = false;
+  // Generate Magic Link JWT
+  const magicToken = generateToken(
+    {
+      id: user._id,
+      email: user.email,
+    },
+    ENV.EMAIL_VERIFICATION_SECRET,
+    "15min",
+  );
+
+  await sendVerificationEmail(email, magicToken);
+
+  return customer;
+};
+
+//! Create Vendor Service
+const createVendorToDB = async (payLoad: {
+  name: string;
+  email: string;
+  password: string;
+  phone: string | number;
+  store_name?: string;
+  paymentMethod?: any;
+  address?: any;
+  verification?: any;
+}) => {
+  const {
+    name,
+    email,
+    password,
+    phone,
+    store_name,
+    paymentMethod,
+    address,
+    verification,
+  } = payLoad;
+
+  const hashedPassword = await hashPassword(password);
+
+  const { user, vendor } = await performDBTransaction(async (session) => {
+    // If user exists, ensure not already vendor and upgrade role
+    let user = await User.findOne({ email }).session(session);
+
+    if (user) {
+      if (user.role === userRoles.Vendor) {
+        throw new AppError("Vendor already exists", 400);
+      }
+      // upgrade existing customer to vendor
+      user.role = userRoles.Vendor;
+      user.name = name || user.name;
+      user.password = hashedPassword;
+      await user.save({ session });
+    } else {
+      // create a new user as vendor
+      [user] = await User.create(
+        [
+          {
+            name,
+            email,
+            password: hashedPassword,
+            role: userRoles.Vendor,
+          },
+        ],
+        { session },
+      );
+    }
+
+    // Ensure no vendor record already exists for this user
+    const existingVendor = await Vendor.findOne({ user_id: user._id }).session(
+      session,
+    );
+    if (existingVendor) {
+      throw new AppError("Vendor already exists", 400);
+    }
+
+    // create vendor document
+    const [vendor] = await Vendor.create(
+      [
+        {
+          user_id: user._id,
+          name,
+          phone,
+          email,
+          store_name: store_name || "",
+          paymentMethod: paymentMethod || {},
+          address: address || {},
+          verification: verification || {},
+        },
+      ],
+      { session },
+    );
+
+    return { user, vendor };
+  });
 
   // Generate Magic Link JWT
   const magicToken = generateToken(
@@ -67,9 +164,102 @@ const registerCustomerToDB = async (payLoad: CustomerRegisterPayload) => {
 
   await sendVerificationEmail(email, magicToken);
 
-  verificationSent = true;
+  return vendor;
+};
 
-  return customer;
+//! Create DeliveryMan Service
+const createDeliveryManToDB = async (payLoad: {
+  name: string;
+  email: string;
+  password: string;
+  phone: string | number;
+  vehicleType: string;
+  address?: any;
+  location?: { latitude: number; longitude: number };
+  verification?: any;
+}) => {
+  const {
+    name,
+    email,
+    password,
+    phone,
+    vehicleType,
+    address,
+    location,
+    verification,
+  } = payLoad;
+
+  const hashedPassword = await hashPassword(password);
+
+  const { user, deliveryMan } = await performDBTransaction(async (session) => {
+    // find existing user
+    let user = await User.findOne({ email }).session(session);
+
+    if (user) {
+      if (user.role === userRoles.Delivery_Man) {
+        throw new AppError("DeliveryMan already exists", 400);
+      }
+      // upgrade role and update password/name
+      user.role = userRoles.Delivery_Man;
+      user.name = name || user.name;
+      user.password = hashedPassword;
+      await user.save({ session });
+    } else {
+      // create new user as deliveryman
+      [user] = await User.create(
+        [
+          {
+            name,
+            email,
+            password: hashedPassword,
+            role: userRoles.Delivery_Man,
+          },
+        ],
+        { session },
+      );
+    }
+
+    // ensure no delivery man document exists
+    const existing = await DeliveryMan.findOne({ userId: user._id }).session(
+      session,
+    );
+
+    if (existing) {
+      throw new AppError("DeliveryMan already exists", 400);
+    }
+
+    // create delivery man document
+    const [deliveryMan] = await DeliveryMan.create(
+      [
+        {
+          userId: user._id,
+          name,
+          phone,
+          address: address || {},
+          location: location || undefined,
+          vehicleType,
+          verification: verification || {},
+        },
+      ],
+      { session },
+    );
+
+    return { user, deliveryMan };
+  });
+
+  // Generate Magic Link JWT
+  const magicToken = generateToken(
+    {
+      id: user._id,
+      email: user.email,
+    },
+    ENV.EMAIL_VERIFICATION_SECRET,
+    "15min",
+  );
+
+  await sendVerificationEmail(email, magicToken);
+
+  return deliveryMan;
 };
 
 //! Login Service
@@ -157,7 +347,6 @@ const sendOTP = async (email: string) => {
   const user = await User.findOne({ email, isVerified: false });
   if (!user) throw new AppError("User not found or already verified", 404);
 
-  // ✅ Add this check:
   const recentOTP = await EmailVerification.findOne({
     email,
     createdAt: { $gt: new Date(Date.now() - 60 * 1000) }, // 1 min cooldown
@@ -170,7 +359,8 @@ const sendOTP = async (email: string) => {
   // Revoke old OTPs
   await EmailVerification.deleteMany({ userId: user._id, used: false });
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  // Use crypto.randomInt for secure OTP generation
+  const code = randomInt(100000, 1000000).toString(); // 6-digit
   const hashed = await hashPassword(code);
 
   await EmailVerification.create({
@@ -194,22 +384,36 @@ const verifyOTPCode = async (email: string, code: string) => {
 
   if (!record) throw new AppError("Invalid or expired code", 400);
 
-  // ✅ Check attempts
+  // Check attempts (fail fast)
   if (record.attempts >= 3) {
+    // Mark as used to ensure it's not attempted further
+    await EmailVerification.updateOne({ _id: record._id }, { used: true });
     throw new AppError("Too many failed attempts. Request a new OTP.", 429);
   }
 
+  // Validate code
   if (!(await record.isValidCode(code))) {
-    // ✅ Increment attempts
-    await EmailVerification.updateOne(
-      { _id: record._id },
-
+    // Increment attempts atomically
+    const updated = await EmailVerification.findByIdAndUpdate(
+      record._id,
       { $inc: { attempts: 1 } },
+      { new: true },
     );
+
+    if (updated && updated.attempts >= 3) {
+      // Lock this OTP after reaching attempt limit
+      await EmailVerification.updateOne({ _id: record._id }, { used: true });
+      throw new AppError("Too many failed attempts. Request a new OTP.", 429);
+    }
+
     throw new AppError("Incorrect code", 400);
   }
 
-  await EmailVerification.updateOne({ _id: record._id }, { used: true });
+  // Mark OTP as used atomically to prevent reuse/race conditions
+  await EmailVerification.findOneAndUpdate(
+    { _id: record._id, used: false },
+    { $set: { used: true } },
+  );
 
   const user = await User.findByIdAndUpdate(
     record.userId,
@@ -219,7 +423,7 @@ const verifyOTPCode = async (email: string, code: string) => {
 
   if (!user) throw new AppError("User not found", 404);
 
-  // Generate tokens AFTER transaction (doesn't need DB lock)
+  // Generate tokens AFTER transaction/verification
   const accessToken = generateToken(
     {
       id: user._id,
@@ -359,4 +563,6 @@ export const AuthService = {
   refreshAccessToken,
   forgotPassword,
   resetPassword,
+  createVendorToDB,
+  createDeliveryManToDB, // added
 };

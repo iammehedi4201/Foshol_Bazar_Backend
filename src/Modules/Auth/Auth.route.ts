@@ -3,6 +3,8 @@ import { Router } from "express";
 import { AuthController } from "./Auth.controller";
 import {
   createCustomerValidation,
+  createDeliveryManValidation,
+  createVendorValidation,
   forgotPasswordSchema,
   loginSchema,
   refreshTokenSchema,
@@ -17,6 +19,20 @@ router.post(
   "/register-customer",
   ValidateRequest(createCustomerValidation),
   AuthController.registerCustomerToDB,
+);
+
+//! Create Vendor
+router.post(
+  "/register-vendor",
+  ValidateRequest(createVendorValidation),
+  AuthController.registerVendorToDB,
+);
+
+//! Create Delivery Man
+router.post(
+  "/register-deliveryman",
+  ValidateRequest(createDeliveryManValidation),
+  AuthController.registerDeliveryManToDB,
 );
 
 //! Login User

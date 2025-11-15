@@ -24,11 +24,6 @@ const emailVerificationSchema = new Schema<EmailVerificationModel>(
       type: String,
       required: true,
     },
-    type: {
-      type: String,
-      enum: ["otp"],
-      default: "otp",
-    },
     expiresAt: {
       type: Date,
       required: true,
@@ -50,10 +45,10 @@ const emailVerificationSchema = new Schema<EmailVerificationModel>(
 );
 
 // === INDEXES ===
-emailVerificationSchema.index({ email: 1, type: 1 });
+emailVerificationSchema.index({ email: 1 });
 emailVerificationSchema.index({ userId: 1, used: 1 });
 
-// Auto-delete expired tokens (MongoDB TTL)
+// Auto-delete expired tokens (MongoDB TTL) - deletes after 10 minutes
 emailVerificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // === METHODS ===

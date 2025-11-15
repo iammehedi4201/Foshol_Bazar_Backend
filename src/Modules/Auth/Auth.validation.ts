@@ -78,3 +78,76 @@ export const resetPasswordSchema = z.object({
       path: ["confirmPassword"],
     }),
 });
+
+// Create Vendor Validation
+export const createVendorValidation = z.object({
+  body: z
+    .object({
+      name: z.string().min(2, "Name must be at least 2 characters"),
+      email: z.string().email("Invalid email address"),
+      password: passwordSchema,
+      confirmPassword: passwordSchema,
+      phone: z.string().min(6, "Phone is required"),
+      store_name: z.string().optional(),
+      paymentMethod: z
+        .object({
+          bank: z.string().min(1),
+          bikash: z.union([z.number(), z.string()]).optional(),
+          nigod: z.union([z.number(), z.string()]).optional(),
+        })
+        .optional(),
+      address: z
+        .object({
+          full: z.string().min(1),
+          area: z.string().min(1),
+          city: z.string().min(1),
+        })
+        .optional(),
+      verification: z
+        .object({
+          nid: z.string().min(6),
+          tradeLicense: z.string().min(1),
+        })
+        .optional(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords do not match",
+      path: ["confirmPassword"],
+    }),
+});
+
+// Create DeliveryMan Validation
+export const createDeliveryManValidation = z.object({
+  body: z
+    .object({
+      name: z.string().min(2, "Name must be at least 2 characters"),
+      email: z.string().email("Invalid email address"),
+      password: passwordSchema,
+      confirmPassword: passwordSchema,
+      phone: z.string().min(6, "Phone is required"),
+      vehicleType: z
+        .string()
+        .min(1, "Vehicle type is required")
+        .refine(
+          (val) => ["Bike", "Car", "Bicycle", "Van"].includes(val),
+          "Invalid vehicle type",
+        ),
+      address: addressSchema.optional(),
+      location: z
+        .object({
+          latitude: z.number().min(-90).max(90),
+          longitude: z.number().min(-180).max(180),
+        })
+        .optional(),
+      verification: z
+        .object({
+          nid: z.string().min(6).optional(),
+          drivingLicense: z.string().optional(),
+        })
+        .optional(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords do not match",
+      path: ["confirmPassword"],
+    }),
+});

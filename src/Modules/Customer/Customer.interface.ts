@@ -15,6 +15,7 @@ export interface ICustomer {
   image?: string;
   isActive: boolean;
   isVerified: boolean;
+  isProfileComplete: boolean;
 }
 
 export interface CustomerRegisterPayload
